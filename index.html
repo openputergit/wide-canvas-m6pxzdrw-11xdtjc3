@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Literature Mining Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40%, 60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="bg-blue-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
+            <h1 class="text-2xl font-bold mb-4 sm:mb-0">BioMedMiner</h1>
+            <div class="space-x-2 sm:space-x-4">
+                <button onclick="showPage('register')" class="px-3 py-1 rounded hover:bg-blue-700 transition">Register</button>
+                <button onclick="showPage('mining')" class="px-3 py-1 rounded hover:bg-blue-700 transition">Literature Mining</button>
+                <button onclick="showPage('ontology')" class="px-3 py-1 rounded hover:bg-blue-700 transition">Gene Analysis</button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="register" class="page active container mx-auto p-4 sm:p-8 max-w-md">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Create Research Account</h2>
+            <form onsubmit="handleRegister(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700">Full Name</label>
+                    <input type="text" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700">Institution</label>
+                    <input type="text" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700">Email</label>
+                    <input type="email" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700">Password</label>
+                    <input type="password" required minlength="8" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="mining" class="page container mx-auto p-4 sm:p-8">
+        <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">PubMed Literature Mining</h2>
+            <div class="mb-6 space-y-4">
+                <div>
+                    <input type="text" id="searchQuery" placeholder="Enter keywords, genes, or proteins..." class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <select id="yearFilter" class="p-2 border rounded">
+                        <option value="">All Years</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                    </select>
+                    <select id="articleType" class="p-2 border rounded">
+                        <option value="">All Types</option>
+                        <option value="research">Research Article</option>
+                        <option value="review">Review</option>
+                    </select>
+                    <button onclick="searchPubMed()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <button onclick="clearResults()" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 transition">
+                        Clear
+                    </button>
+                </div>
+            </div>
+            <div id="searchResults" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <div id="ontology" class="page container mx-auto p-4 sm:p-8">
+        <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Gene Ontology Analysis</h2>
+            <div class="grid gap-6 md:grid-cols-2">
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Input Genes</h3>
+                    <textarea id="geneList" placeholder="Enter gene symbols (one per line)..." class="w-full p-3 border rounded h-48 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <div class="mt-2">
+                        <button onclick="analyzeGenes()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+                            <i class="bi bi-gear"></i> Analyze
+                        </button>
+                        <button onclick="loadExampleGenes()" class="ml-2 text-blue-600 hover:underline">
+                            Load Example
+                        </button>
+                    </div>
+                </div>
+                <div id="analysisResults" class="space-y-4">
+                    <div class="text-gray-500 text-center mt-8">
+                        Enter genes to see analysis results
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            alert('Registration successful! Welcome to BioMedMiner.');
+            showPage('mining');
+        }
+
+        function loadExampleGenes() {
+            const exampleGenes = "TP53\nBRCA1\nEGFR\nVEGF\nTNF\nIL6";
+            document.getElementById('geneList').value = exampleGenes;
+        }
+
+        async function searchPubMed() {
+            const query = document.getElementById('searchQuery').value;
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '<p class="text-blue-600 loading">Searching PubMed database</p>';
+
+            setTimeout(() => {
+                const mockResults = [
+                    {
+                        title: "BRCA1 and TP53 mutations in breast cancer",
+                        authors: "Johnson et al.",
+                        year: 2023,
+                        abstract: "This study investigates the role of BRCA1 and TP53 mutations...",
+                        genes: ["BRCA1", "TP53", "PTEN"]
+                    },
+                    {
+                        title: "Novel pathways in cellular signaling",
+                        authors: "Smith et al.",
+                        year: 2023,
+                        abstract: "Investigation of EGFR signaling pathways reveals...",
+                        genes: ["EGFR", "MAPK", "AKT"]
+                    }
+                ];
+
+                resultsDiv.innerHTML = mockResults.map(result => `
+                    <div class="p-4 border rounded hover:bg-gray-50 transition">
+                        <h3 class="font-semibold text-lg text-blue-600">${result.title}</h3>
+                        <p class="text-gray-600">${result.authors} (${result.year})</p>
+                        <p class="mt-2">${result.abstract}</p>
+                        <div class="mt-2">
+                            <span class="text-sm font-medium">Related Genes: </span>
+                            ${result.genes.map(gene => 
+                                `<span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm mr-1">${gene}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }, 1500);
+        }
+
+        function clearResults() {
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('searchQuery').value = '';
+        }
+
+        function analyzeGenes() {
+            const geneList = document.getElementById('geneList').value;
+            const resultsDiv = document.getElementById('analysisResults');
+            resultsDiv.innerHTML = '<p class="text-blue-600 loading">Analyzing genes</p>';
+
+            setTimeout(() => {
+                resultsDiv.innerHTML = `
+                    <div class="border rounded p-4">
+                        <h3 class="font-semibold mb-2 text-lg">Biological Processes</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Cell signaling</span>
+                                <span class="text-green-600">p=0.001</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full" style="width: 90%"></div>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>DNA repair</span>
+                                <span class="text-green-600">p=0.003</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border rounded p-4 mt-4">
+                        <h3 class="font-semibold mb-2 text-lg">Molecular Functions</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>ATP binding</span>
+                                <span class="text-blue-600">p=0.002</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Protein binding</span>
+                                <span class="text-blue-600">p=0.004</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }, 2000);
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
